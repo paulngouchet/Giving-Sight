@@ -85,11 +85,9 @@ class YOLO_TF:
 		channels = inputs.get_shape()[3]
 		weight = tf.Variable(tf.truncated_normal([size,size,int(channels),filters], stddev=0.1))
 		biases = tf.Variable(tf.constant(0.1, shape=[filters]))
-
 		pad_size = size//2
 		pad_mat = np.array([[0,0],[pad_size,pad_size],[pad_size,pad_size],[0,0]])
 		inputs_pad = tf.pad(inputs,pad_mat)
-
 		conv = tf.nn.conv2d(inputs_pad, weight, strides=[1, stride, stride, 1], padding='VALID',name=str(idx)+'_conv')
 		conv_biased = tf.add(conv,biases,name=str(idx)+'_conv_biased')
 		if self.disp_console : print( '    Layer  %d : Type = Conv, Size = %d * %d, Stride = %d, Filters = %d, Input channels = %d' % (idx,size,size,stride,filters,int(channels)))
@@ -144,8 +142,6 @@ class YOLO_TF:
 		    #cv2.imshow('frame',frame)
 			if cv2.waitKey(1) & 0xFF == ord('q'):
 				break
-
-
 		#img = misc.imread(filename)
 		#self.detect_from_cvmat(img)
 
@@ -171,13 +167,11 @@ class YOLO_TF:
 		scales = np.reshape(output[980:1078],(7,7,2))
 		boxes = np.reshape(output[1078:],(7,7,2,4))
 		offset = np.transpose(np.reshape(np.array([np.arange(7)]*14),(2,7,7)),(1,2,0))
-
 		boxes[:,:,:,0] += offset
 		boxes[:,:,:,1] += np.transpose(offset,(1,0,2))
 		boxes[:,:,:,0:2] = boxes[:,:,:,0:2] / 7.0
 		boxes[:,:,:,2] = np.multiply(boxes[:,:,:,2],boxes[:,:,:,2])
 		boxes[:,:,:,3] = np.multiply(boxes[:,:,:,3],boxes[:,:,:,3])
-
 		boxes[:,:,:,0] *= self.w_img
 		boxes[:,:,:,1] *= self.h_img
 		boxes[:,:,:,2] *= self.w_img
@@ -192,7 +186,6 @@ class YOLO_TF:
 		boxes_filtered = boxes[filter_mat_boxes[0],filter_mat_boxes[1],filter_mat_boxes[2]]
 		probs_filtered = probs[filter_mat_probs]
 		classes_num_filtered = np.argmax(filter_mat_probs,axis=3)[filter_mat_boxes[0],filter_mat_boxes[1],filter_mat_boxes[2]]
-
 		argsort = np.array(np.argsort(probs_filtered))[::-1]
 		boxes_filtered = boxes_filtered[argsort]
 		probs_filtered = probs_filtered[argsort]
@@ -208,11 +201,9 @@ class YOLO_TF:
 		boxes_filtered = boxes_filtered[filter_iou]
 		probs_filtered = probs_filtered[filter_iou]
 		classes_num_filtered = classes_num_filtered[filter_iou]
-
 		result = []
 		for i in range(len(boxes_filtered)):
 			result.append([self.classes[classes_num_filtered[i]],boxes_filtered[i][0],boxes_filtered[i][1],boxes_filtered[i][2],boxes_filtered[i][3],probs_filtered[i]])
-
 		return result
 
 	def show_results(self,img,results):
@@ -251,15 +242,11 @@ class YOLO_TF:
 	def training(self): #TODO add training function!
 		return None
 
-
-
-
 def main(argvs):
 	yolo = YOLO_TF(argvs)
 	cap.release()
 	cv2.destroyAllWindows()
 	#cv2.waitKey(10000)
-
-
+	
 if __name__=='__main__':
 	main(sys.argv)
